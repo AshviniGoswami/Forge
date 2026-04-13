@@ -16,7 +16,7 @@
 
 **Problem:** Generic fitness plans found online don't account for a person's unique goals, fitness level, available equipment, dietary restrictions, or health conditions. Hiring a personal trainer or nutritionist is expensive and inaccessible to most people.
 
-**Why Agentic?** Creating a truly personalized fitness + nutrition plan requires multiple specialized tasks — researching current evidence-based guidelines, structuring a progressive workout schedule, calculating macros, and evaluating the output for scientific validity. No single prompt can do all of this reliably. An agentic approach decomposes this into specialized agents, each with a focused role, producing a far more accurate and trustworthy result.
+**Why Agentic?** Creating a truly personalized fitness + nutrition plan requires multiple specialized tasks researching current evidence-based guidelines, structuring a progressive workout schedule, calculating macros, and evaluating the output for scientific validity. No single prompt can do all of this reliably. An agentic approach decomposes this into specialized agents, each with a focused role, producing a far more accurate and trustworthy result.
 
 ---
 
