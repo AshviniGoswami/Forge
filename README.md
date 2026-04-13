@@ -1,156 +1,196 @@
-# 💪 Fitness & Wellness Plan Builder
+# ⚡ FORGE - AI-Powered Fitness & Wellness Plan Builder
 
-An AI-powered multi-agent system that generates personalized 4-week fitness & nutrition plans, evaluated by an independent LLM-as-Judge for scientific soundness.
+> An intelligent multi-agent system that generates personalized 4-week fitness and nutrition plans, grounded in real-time research and evaluated by an LLM-as-Judge.
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.32+-red?style=flat-square&logo=streamlit)
+![Gemini](https://img.shields.io/badge/Gemini-API-orange?style=flat-square&logo=google)
+![Tavily](https://img.shields.io/badge/Tavily-Search-green?style=flat-square)
+![Railway](https://img.shields.io/badge/Deployed-Railway-purple?style=flat-square&logo=railway)
 
 ---
 
-## 🏗️ Architecture
+## 🧩 Problem Statement
+
+**User:** Fitness enthusiasts, beginners, and health-conscious individuals.
+
+**Problem:** Generic fitness plans found online don't account for a person's unique goals, fitness level, available equipment, dietary restrictions, or health conditions. Hiring a personal trainer or nutritionist is expensive and inaccessible to most people.
+
+**Why Agentic?** Creating a truly personalized fitness + nutrition plan requires multiple specialized tasks — researching current evidence-based guidelines, structuring a progressive workout schedule, calculating macros, and evaluating the output for scientific validity. No single prompt can do all of this reliably. An agentic approach decomposes this into specialized agents, each with a focused role, producing a far more accurate and trustworthy result.
+
+---
+
+## 📋 Task Decomposition & Specs
+
+The system breaks down the plan generation into **4 discrete agent tasks**:
+
+| Step | Agent | Input | Output |
+|------|-------|-------|--------|
+| 1 | **Guidelines Researcher** | User profile | Evidence-based fitness & nutrition findings from the web |
+| 2 | **Workout Planner** | Profile + Research | 4-week progressive workout schedule (sets, reps, days) |
+| 3 | **Nutrition Advisor** | Profile + Research | Macro targets, meal plan, hydration & supplement guide |
+| 4 | **LLM-as-Judge** | All outputs + Profile | Scientific score (0–10), rubric breakdown, strengths & warnings |
+
+### Decision Points
+- If no equipment selected → agent defaults to bodyweight-only exercises
+- If health notes present → Workout Planner avoids contraindicated movements
+- If dietary preference is Vegan/Vegetarian → Nutrition Advisor enforces strict compliance (1.5x weight in rubric)
+- If Judge score < 6 → warnings are surfaced prominently in the UI
+
+---
+
+## 🏗️ Architecture Diagram
 
 ```
-User Profile Input
-       │
-       ▼
-┌─────────────────────┐
-│ Guidelines          │  ← Tavily Search (evidence-based research)
-│ Researcher Agent    │  ← Gemini synthesis
-└─────────┬───────────┘
-          │ Evidence-based guidelines
-          ▼
-┌─────────────────────┐
-│ Workout Planner     │  ← Gemini (4-week progressive plan)
-│ Agent               │
-└─────────┬───────────┘
-          │
-┌─────────────────────┐
-│ Nutrition Advisor   │  ← Gemini (macros + meal plan)
-│ Agent               │
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│ LLM-as-Judge        │  ← Independent Gemini call
-│ (10-criterion rubric│  ← Weighted scoring
-│  evaluation)        │
-└─────────────────────┘
-          │
-          ▼
-     Final Report
-  (Plan + Judge Score)
+┌─────────────────────────────────────────────────────────┐
+│                     USER (Streamlit UI)                  │
+│         Goal / Level / Age / Equipment / Diet            │
+└────────────────────────┬────────────────────────────────┘
+                         │ User Profile
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│              Agent Pipeline (Sequential)                 │
+│                                                          │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │  [01] Guidelines Researcher                      │    │
+│  │  • Tavily Search API → fetches real-time         │    │
+│  │    fitness & nutrition research                  │    │
+│  │  • Gemini API → summarizes findings              │    │
+│  └──────────────────────┬──────────────────────────┘    │
+│                         │ Research Findings              │
+│  ┌──────────────────────▼──────────────────────────┐    │
+│  │  [02] Workout Planner                            │    │
+│  │  • Gemini API → generates 4-week progressive    │    │
+│  │    workout plan (days, sets, reps, muscle groups)│    │
+│  └──────────────────────┬──────────────────────────┘    │
+│                         │ Workout Plan (JSON)            │
+│  ┌──────────────────────▼──────────────────────────┐    │
+│  │  [03] Nutrition Advisor                          │    │
+│  │  • Gemini API → calculates macros, meal timing, │    │
+│  │    hydration, supplements                        │    │
+│  └──────────────────────┬──────────────────────────┘    │
+│                         │ Nutrition Plan (JSON)          │
+│  ┌──────────────────────▼──────────────────────────┐    │
+│  │  [04] LLM-as-Judge                               │    │
+│  │  • Gemini API → evaluates all outputs against   │    │
+│  │    10-criterion scientific rubric                │    │
+│  │  • Returns score, verdict, strengths, warnings  │    │
+│  └──────────────────────┬──────────────────────────┘    │
+│                         │ Judge Report (JSON)            │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│              Streamlit UI — Tabbed Results               │
+│   [Workout Plan] [Nutrition] [Research] [Judge Report]   │
+└─────────────────────────────────────────────────────────┘
+
+Tech Stack:
+  Frontend  →  Streamlit (Python)
+  LLM       →  Google Gemini API (gemini-1.5-flash)
+  Search    →  Tavily Search API
+  Hosting   →  Railway
 ```
 
-## 🚀 Setup & Run
+---
 
-### 1. Install Dependencies
+## ✨ Features
+
+- 🤖 **Multi-Agent Pipeline** - 4 specialized agents working sequentially
+- 🔍 **Real-Time Research** - Tavily Search fetches current evidence-based guidelines
+- 🏋️ **Progressive 4-Week Workout Plan** - Tailored to goal, level, equipment
+- 🥗 **Full Nutrition Plan** - Macros, meals, hydration, supplements
+- ⚖️ **LLM-as-Judge Evaluation** - 10-criterion rubric with scientific scoring
+- 🎨 **Clean Light UI** - Built with Streamlit + custom CSS
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Streamlit |
+| LLM | Google Gemini API (`gemini-1.5-flash`) |
+| Web Search | Tavily Search API |
+| Language | Python 3.10+ |
+| Deployment | Railway |
+
+---
+
+## 🚀 Local Setup
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/AshviniGoswami/Forge.git
+cd Forge
+```
+
+### 2. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Get API Keys
-- **Gemini API Key**: https://aistudio.google.com/ → Get API Key (Free tier available)
-- **Tavily API Key**: https://tavily.com → Sign up (Free tier: 1000 searches/month)
-
-### 3. Run the App
+### 3. Run the app
 ```bash
 streamlit run app.py
 ```
 
-### 4. Enter Keys in Sidebar
-Enter your Gemini and Tavily API keys in the sidebar when prompted.
-
----
-
-## ⚖️ LLM-as-Judge: Rubric Criteria
-
-The judge evaluates on **10 criteria** with **weighted scoring**:
-
-| Criterion | Weight | What It Checks |
-|-----------|--------|----------------|
-| Progressive Overload | 1.0x | Week-over-week intensity increase |
-| Muscle Group Balance | 1.0x | Push/pull balance, no injury risk |
-| Rest & Recovery | 1.0x | 48hr rule, deload week |
-| Macro Distribution | 1.0x | Evidence-based protein/calorie targets |
-| Exercise Selection | 1.0x | Equipment-feasible, compound-first |
-| Fitness Level Match | 1.0x | Complexity matches stated level |
-| **Dietary Compliance** | **1.5x** | Zero tolerance for preference violations |
-| **Safety** | **1.5x** | Injury modifications applied |
-| Goal Alignment | 1.0x | Every element targets stated goal |
-| Actionability | 1.0x | Specific sets/reps/portions |
-
-**Total weight: 11.0x → Normalized to /10 score**
-
-### Score Interpretation
-- **8-10**: Excellent — scientifically sound, ready to use
-- **6-7**: Good — minor improvements recommended
-- **< 6**: Needs improvement — review flagged criteria
+### 4. Add your API keys in the sidebar
+- **Gemini API Key** → [aistudio.google.com](https://aistudio.google.com)
+- **Tavily API Key** → [tavily.com](https://tavily.com)
 
 ---
 
 ## 📁 Project Structure
 
 ```
-fitness_wellness_builder/
-├── app.py                          # Streamlit UI
+Forge/
+├── app.py                   # Main Streamlit app + UI
+├── agents/
+│   ├── guidelines_researcher.py   # Agent 1 — Tavily + Gemini research
+│   ├── workout_planner.py         # Agent 2 — 4-week workout generator
+│   ├── nutrition_advisor.py       # Agent 3 — Macro + meal planner
+│   └── llm_judge.py               # Agent 4 — LLM-as-Judge evaluator
 ├── requirements.txt
-├── README.md
-└── agents/
-    ├── __init__.py
-    ├── guidelines_researcher.py    # Tavily + Gemini research agent
-    ├── workout_planner.py          # 4-week plan generation
-    ├── nutrition_advisor.py        # Macro + meal planning
-    └── llm_judge.py               # Independent evaluation + rubric
+├── Procfile                 # Railway deployment config
+└── README.md
 ```
 
-## 🛠️ Tech Stack
+---
 
-| Component | Technology |
-|-----------|------------|
-| Language | Python 3.10+ |
-| UI / Frontend | Streamlit |
-| Search Tool | Tavily Search API |
-| LLM Provider | Google Gemini 2.0 Flash |
-| Deployment | Streamlit Cloud / Railway / Vercel |
+## ⚖️ LLM-as-Judge Rubric
 
-## ☁️ Deploy to Streamlit Cloud (Free)
+The Judge agent evaluates the final plan across **10 scientific criteria**:
 
-1. Push to GitHub
-2. Go to https://share.streamlit.io
-3. Connect your repo → select `app.py`
-4. Add secrets in Settings:
-   ```
-   GEMINI_API_KEY = "your-key"
-   TAVILY_API_KEY = "your-key"
-   ```
-   Or let users enter keys in the sidebar (current implementation).
+| Criterion | Weight |
+|-----------|--------|
+| Progressive Overload Principle | 1.0x |
+| Muscle Group Balance | 1.0x |
+| Rest & Recovery Adequacy | 1.0x |
+| Macro Distribution Validity | 1.0x |
+| Evidence-Based Exercise Selection | 1.0x |
+| Fitness Level Appropriateness | 1.0x |
+| **Dietary Preference Compliance** | **1.5x** |
+| **Safety & Injury Consideration** | **1.5x** |
+| Goal Alignment | 1.0x |
+| Completeness & Actionability | 1.0x |
 
-## Deploy to Railway
+Scores are weighted, producing a final **0–10 scientific quality score**.
 
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
+---
 
-# Login and deploy
-railway login
-railway init
-railway up
-```
+## 🌐 Deployed App
 
-Set environment variables in Railway dashboard.
+🔗 **Live URL:** `https://web-production-5abb8.up.railway.app/`
 
 ---
 
 ## ⚠️ Disclaimer
 
-This application provides **general wellness information only** and is **not medical advice**. Always consult a qualified healthcare professional before starting any fitness or nutrition program, especially if you have pre-existing health conditions.
+This app is for **general wellness purposes only** and does not constitute medical advice. Always consult a qualified healthcare professional before starting any fitness or nutrition program.
 
 ---
 
-## 🎯 Hackathon Notes
+## 👨‍💻 Built By
 
-This project implements:
-- ✅ **Multi-agent pipeline** (4 specialized agents)
-- ✅ **Tavily Search integration** for evidence-based research
-- ✅ **LLM-as-Judge** with well-defined 10-criterion weighted rubric
-- ✅ **Gemini 2.0 Flash** as LLM provider
-- ✅ **Streamlit** frontend
-- ✅ **Independent judge** (separate API call, no shared context with planners)
-- ✅ **Fallback handling** for all agents
+**Ashvini Goswami** & **Deepjoti**
