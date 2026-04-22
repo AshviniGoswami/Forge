@@ -94,6 +94,10 @@ Tech Stack:
 
 ---
 
+## 🏗️ Architecture Diagram
+
+
+
 ## ✨ Features
 
 - 🤖 **Multi-Agent Pipeline** - 4 specialized agents working sequentially
