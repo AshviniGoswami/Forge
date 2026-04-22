@@ -41,62 +41,10 @@ The system breaks down the plan generation into **4 discrete agent tasks**:
 
 ## 🏗️ Architecture Diagram
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                     USER (Streamlit UI)                  │
-│         Goal / Level / Age / Equipment / Diet            │
-└────────────────────────┬────────────────────────────────┘
-                         │ User Profile
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│              Agent Pipeline (Sequential)                 │
-│                                                          │
-│  ┌─────────────────────────────────────────────────┐    │
-│  │  [01] Guidelines Researcher                      │    │
-│  │  • Tavily Search API → fetches real-time         │    │
-│  │    fitness & nutrition research                  │    │
-│  │  • Gemini API → summarizes findings              │    │
-│  └──────────────────────┬──────────────────────────┘    │
-│                         │ Research Findings              │
-│  ┌──────────────────────▼──────────────────────────┐    │
-│  │  [02] Workout Planner                            │    │
-│  │  • Gemini API → generates 4-week progressive    │    │
-│  │    workout plan (days, sets, reps, muscle groups)│    │
-│  └──────────────────────┬──────────────────────────┘    │
-│                         │ Workout Plan (JSON)            │
-│  ┌──────────────────────▼──────────────────────────┐    │
-│  │  [03] Nutrition Advisor                          │    │
-│  │  • Gemini API → calculates macros, meal timing, │    │
-│  │    hydration, supplements                        │    │
-│  └──────────────────────┬──────────────────────────┘    │
-│                         │ Nutrition Plan (JSON)          │
-│  ┌──────────────────────▼──────────────────────────┐    │
-│  │  [04] LLM-as-Judge                               │    │
-│  │  • Gemini API → evaluates all outputs against   │    │
-│  │    10-criterion scientific rubric                │    │
-│  │  • Returns score, verdict, strengths, warnings  │    │
-│  └──────────────────────┬──────────────────────────┘    │
-│                         │ Judge Report (JSON)            │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│              Streamlit UI — Tabbed Results               │
-│   [Workout Plan] [Nutrition] [Research] [Judge Report]   │
-└─────────────────────────────────────────────────────────┘
-
-Tech Stack:
-  Frontend  →  Streamlit (Python)
-  LLM       →  Google Gemini API (gemini-1.5-flash)
-  Search    →  Tavily Search API
-  Hosting   →  Railway
+![image alt](https://github.com/AshviniGoswami/Forge/blob/278c325d319fd76dc2b4871062e22e8ec06bacd0/Architecutecture%20diagram.png)
 ```
 
 ---
-
-## 🏗️ Architecture Diagram
-
-![image alt](https://github.com/AshviniGoswami/Forge/blob/278c325d319fd76dc2b4871062e22e8ec06bacd0/Architecutecture%20diagram.png)
 
 ## ✨ Features
 
