@@ -96,6 +96,7 @@ Tech Stack:
 
 ## 🏗️ Architecture Diagram
 
+![image alt](https://github.com/AshviniGoswami/Forge/blob/e1f7075a279c85acb329f840e799d2b46371ae14/requirements.txt)
 
 
 ## ✨ Features
