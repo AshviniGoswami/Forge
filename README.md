@@ -145,4 +145,4 @@ This app is for **general wellness purposes only** and does not constitute medic
 
 ## 👨‍💻 Built By
 
-**Ashvini Goswami** & **Deepjoti**
+**Ashvini Goswami** & **Dipjyoti Mohanta**
